@@ -1,10 +1,13 @@
 package coded.toolbox.deviceinfo
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -36,25 +39,31 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
+import coded.toolbox.deviceinfo.battery.BatteryScreen
+import coded.toolbox.deviceinfo.battery.BatteryViewModel
 import coded.toolbox.deviceinfo.camera.CameraScreen
+import coded.toolbox.deviceinfo.cpu.CPUScreen
 import coded.toolbox.deviceinfo.dashboard.DashboardScreen
-import coded.toolbox.deviceinfo.thermal.ThermalScreen
+import coded.toolbox.deviceinfo.device.DeviceScreen
+import coded.toolbox.deviceinfo.display.DisplayScreen
+import coded.toolbox.deviceinfo.system.SystemScreen
+import com.google.android.gms.ads.AdSize
 import kotlinx.coroutines.launch
 import java.util.Locale
 
 
+@RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(navController: NavController) {
+fun HomeScreen(navController: NavController, adBannerManager: AdBannerManager) {
     val context = LocalContext.current
     val categories = listOf(
-        "DASHBOARD", "SYSTEM", "CPU", "BATTERY", "DISPLAY", "MEMORY", "Camera",
-        "THERMAL", "SENSORS", "CODECS", "NETWORK", "INPUT DEVICES", "APPS", "TESTS"
+        "DASHBOARD","DEVICE","SYSTEM","CPU","DISPLAY","BATTERY", "CAMERA",
+        // , "MEMORY", "THERMAL", "SENSORS", "CODECS", "NETWORK", "INPUT DEVICES", "APPS", "TESTS"
     )
 
     // Track the selected category both for the pager and chip
@@ -72,6 +81,7 @@ fun HomeScreen(navController: NavController) {
 
     val formattedCategory = when (selectedCategory.value) {
         "DASHBOARD" -> "Device Info"
+        "DEVICE" -> "Device Info"
         "SYSTEM" -> "System Info"
         "CPU" -> "CPU Info"
         "BATTERY" -> "Battery Info"
@@ -154,7 +164,11 @@ fun HomeScreen(navController: NavController) {
                         )
                     }
                 }
+//                BannerAd(adBannerManager, FULL_BANNER_AD_ID, AdSize.FULL_BANNER)
+//                Spacer(modifier = Modifier.padding(bottom = 2.dp))
 
+                val viewModel: BatteryViewModel =
+                    viewModel() // This creates an instance of BatteryViewModel using Compose's `viewModel()` function
                 // HorizontalPager (This is below the chips and independent)
                 HorizontalPager(
                     state = pagerState,
@@ -163,20 +177,31 @@ fun HomeScreen(navController: NavController) {
                     userScrollEnabled = true // Enable user scroll for manual swipe
                 ) { page ->
                     when (page) {
-                        0 -> DashboardScreen(navController)
-                        1 -> SystemScreen(navController)
-                        2 -> CPUScreen(navController)
-                        3 -> BatteryScreen(navController)
+
+                        0 -> DashboardScreen(navController, adBannerManager)
+                        1 -> DeviceScreen(navController, adBannerManager)
+                        2 -> SystemScreen(navController,adBannerManager)
+                        3 -> CPUScreen(navController,adBannerManager)
                         4 -> DisplayScreen(navController)
-                        5 -> MemoryScreen(navController)
-                        6 -> CameraScreen(navController, context)
-                        7 -> ThermalScreen(navController,context)
-                        8 -> SensorsScreen(navController)
-                        9 -> CodecsScreen(navController)
-                        10 -> NetworkScreen(navController)
-                        11 -> InputDevicesScreen(navController)
-                        12 -> AppsScreen(navController)
-                        13 -> TestsScreen(navController)
+                        5 -> BatteryScreen(
+                            navController,
+                            context,
+                            MaterialTheme.colorScheme.onSurface,
+                            viewModel,
+                            adBannerManager
+                        )
+                        6 -> CameraScreen(navController, context, adBannerManager)
+
+
+//                        6 -> MemoryScreen(navController)
+//
+//                        7 -> ThermalScreen(navController)
+//                        8 -> SensorsScreen(navController)
+//                        9 -> CodecsScreen(navController)
+//                        10 -> NetworkScreen(navController)
+//                        11 -> InputDevicesScreen(navController)
+//                        12 -> AppsScreen(navController)
+//                        13 -> TestsScreen(navController)
                         else -> PlaceholderScreen(categories[page])
                     }
 
@@ -215,7 +240,7 @@ fun Chip(label: String, isSelected: Boolean, onClick: () -> Unit) {
             BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
         },
         colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.surface,
+            containerColor = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.surface,
             contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
         )
     ) {
@@ -230,18 +255,12 @@ fun Chip(label: String, isSelected: Boolean, onClick: () -> Unit) {
         ) {
             Text(
                 text = label,
-                color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
+                color = if (isSelected) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.onSurface,
                 style = MaterialTheme.typography.bodyMedium.copy(
-                    letterSpacing = 1.3.sp // Adjust the value as needed for desired spacing
+                    letterSpacing = 1.1.sp // Adjust the value as needed for desired spacing
                 ),
                 fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Normal // Bold for selected
             )
         }
     }
-}
-
-@Composable
-@Preview(showBackground = true)
-fun PreviewHomeScreen() {
-    HomeScreen(navController = rememberNavController())
 }

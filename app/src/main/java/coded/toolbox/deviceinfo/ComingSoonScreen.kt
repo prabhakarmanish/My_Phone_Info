@@ -22,26 +22,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 
 @Composable
-fun SystemScreen(navController: NavController) {
-    ComingSoonScreen("System Screen")
-}
-
-@Composable
-fun CPUScreen(navController: NavController) {
-    ComingSoonScreen("CPU Screen")
-}
-
-@Composable
-fun BatteryScreen(navController: NavController) {
-    ComingSoonScreen("Battery Screen")
-}
-
-@Composable
-fun DisplayScreen(navController: NavController) {
-    ComingSoonScreen("Display Screen")
-}
-
-@Composable
 fun MemoryScreen(navController: NavController) {
     ComingSoonScreen("Memory Screen")
 }
@@ -61,6 +41,10 @@ fun NetworkScreen(navController: NavController) {
     ComingSoonScreen("Network Screen")
 }
 
+@Composable
+fun ThermalScreen(navController: NavController) {
+    ComingSoonScreen("Thermal Screen")
+}
 @Composable
 fun InputDevicesScreen(navController: NavController) {
     ComingSoonScreen("Input Devices Screen")
@@ -124,8 +108,8 @@ fun ComingSoonScreen(screenTitle: String) {
                     .background(
                         brush = Brush.linearGradient(
                             colors = listOf(
-                                MaterialTheme.colorScheme.errorContainer,
-                                MaterialTheme.colorScheme.inverseOnSurface
+                                MaterialTheme.colorScheme.outline,
+                                MaterialTheme.colorScheme.primary
                             )
                         ),
                         shape = RoundedCornerShape(24.dp)
